@@ -1,0 +1,12 @@
+ERROR HANDLING
+you usually don’t expose internal errors to clients in real systems because they reveal implementation details.
+
+So the mental framework becomes:
+
+Client mistake → 400
+Resource missing → 404
+Server/database failure → 500
+
+Those three categories cover about 95% of API error handling in practice.
+
+validation is required BEFORE executing implementation
