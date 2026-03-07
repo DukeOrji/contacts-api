@@ -10,3 +10,16 @@ Server/database failure → 500
 Those three categories cover about 95% of API error handling in practice.
 
 validation is required BEFORE executing implementation
+
+GIT
+git init - initializes folder into a repository
+git remote add origin https://....
+
+push new code:
+git branch -M main
+git psuh -u origin main
+
+push new commits:
+git add.
+git commit -m "added comment"
+git push

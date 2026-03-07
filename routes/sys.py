@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 import sqlite3
 from db import get_conn
+from db import basic_validation as bv
 from auth import require_api_key
 sys_bp = Blueprint("sys", __name__) #create blueprint - easily register endpoints
-
 
 
 #Insert sample data into rows
@@ -16,26 +16,27 @@ def insert_data():
 
     name = data.get("name")
     number = data.get("number")
+    email = data.get("email")
+    address = data.get("address")
 
     conn = get_conn() 
     cur = conn.cursor()
 
-    #make sure the user is string (basic validation)
-    if not name or not number:
-            return jsonify({"error": "name and number required"}), 400
-    if not isinstance(name, str) or not isinstance(number, str):
-        return jsonify({"error": "name and number must be strings"}), 400
+    #make sure variable acceot the necessary data type (basic validation)
+    bv(name, number, email, address)
     
     try:
         cur.execute("INSERT INTO users (name) VALUES(?)", (name,))
         user_id = cur.lastrowid
-        cur.execute("INSERT INTO contacts (number, user_id) VALUES(?, ?)", (number, user_id))
+        cur.execute("INSERT INTO contacts (number, email, user_id, address) VALUES(?, ?)", (number, email, user_id, address))
         conn.commit()
 
         return jsonify({
-            "name": name,
-            "number": number,
-            "user_id": user_id
+            "Name": name,
+            "Number": number,
+            "Email": email,
+            "Address": address,
+            "User_id": user_id
         }), 201 #resouce is created
 
     except sqlite3.Error as e:
@@ -50,12 +51,12 @@ def list_user_table(user_id):
 
     cur.execute("SELECT id FROM users WHERE id=?", (user_id,))
     user = cur.fetchone()
-    if user is None:
+    if user is None:    #verify user before linking contact information
         conn.close()
         return jsonify({"Error": "user id was not found"}), 404
 
     cur.execute("""
-    SELECT users.name, contacts.number
+    SELECT users.name, contacts.number, contacts.email, contacts.address
     FROM users
     JOIN contacts ON users.id = contacts.user_id
     WHERE users.id = ?
@@ -77,7 +78,7 @@ def list_all_tables():
     cur = conn.cursor()
 
     cur.execute("""
-    SELECT users.name, contacts.number
+    SELECT users.name, contacts.number, contacts.email, contacts.address
     FROM users
     JOIN contacts ON users.id = contacts.user_id
     ORDER BY users.id ASC
