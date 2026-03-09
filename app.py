@@ -1,5 +1,5 @@
 """
-This software was create dto showcase my technical skills, such as: 
+This software was created to showcase my technical skills, such as: 
 error handling, authenticative authorization, sql usage, technical framework architechture
 ------
 This software houses tables for a user and their contact info, such as:

@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from db import get_conn
 from db import basic_validation as bv
+from auth import require_api_key
 modify_bp = Blueprint("modify", __name__)
 
 #delete data implementations/empty the table for a specific user
 @modify_bp.route("/users/<int:user_id>/contacts/del", methods=["DELETE"])
+@require_api_key 
 def del_user_table(user_id):
     conn = get_conn()
     cur = conn.cursor()
@@ -15,14 +17,15 @@ def del_user_table(user_id):
         conn.close()
         return jsonify({"Error": "user id was not found"}), 404
     
-    cur.execute("DELETE FROM users WHERE id=?", (user_id,))
     cur.execute("DELETE FROM contacts WHERE user_id=?", (user_id,))
+    cur.execute("DELETE FROM users WHERE id=?", (user_id,))
     conn.commit()
     conn.close()
     return jsonify({"success": "User Table has been cleared"}), 200
 
 #delete data implementations/empty the table
 @modify_bp.route("/users/contacts/del", methods = ["DELETE"])
+@require_api_key 
 def delete_table():
     conn = get_conn()
     cur = conn.cursor()
@@ -39,6 +42,7 @@ def delete_table():
 
 #upadate implementations per user
 @modify_bp.route("/users/<int:user_id>/contacts", methods = ["PUT"])
+@require_api_key 
 def update_list(user_id):
     data = request.get_json(force=True)
     if not data:
@@ -53,12 +57,14 @@ def update_list(user_id):
     cur = conn.cursor()
 
     #make sure the user is string (basic validation)
-    bv(name, number, email, address)
+    validation = bv(name, number, email, address)
+    if validation:
+        return validation
     
     cur.execute("UPDATE users SET name=? WHERE id=?", (name, user_id))
     cur.execute("""
     UPDATE contacts 
-    SET number=? email=? address=?
+    SET number=?, email=?, address=?
     WHERE user_id=?
     """, (number, email, address, user_id))
 

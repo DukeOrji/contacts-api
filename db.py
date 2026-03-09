@@ -6,6 +6,20 @@ def get_conn():
     conn.row_factory = sqlite3.Row
     return conn
 
+#initially clear the database - for testing purposes
+def clear_db():
+    conn = get_conn()
+    cur = conn.cursor()
+
+    cur.execute("DELETE FROM contacts")
+    cur.execute("DELETE FROM users")
+    cur.execute("DELETE FROM sqlite_sequence WHERE name= 'users'")
+    cur.execute("DELETE FROM sqlite_sequence WHERE name= 'contacts'")
+
+    conn.commit()
+    conn.close()
+
+
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
@@ -29,21 +43,14 @@ def init_db():
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
     """)
+    #clear_db()
     conn.commit()
     conn.close()
 
 def basic_validation(name, number, email, address):
-    if not name:
-            return jsonify({"error": "name required"}), 400
-    if not number:
-            return jsonify({"error": "number required"}), 400
-    if not email:
-            return jsonify({"error": "email required"}), 400
-    if not address:
-            return jsonify({"error": "address required"}), 400
-    if not isinstance(name, str):
-        return jsonify({"error": "name must be strings"}), 400
-    if not isinstance(number, int):
-         return jsonify({"error": "number must be integer"}), 400
+    if not all([name, number, email, address]):
+        return jsonify({"error": "All fields are required"}), 400
+    if not isinstance(name, str) or not isinstance(number, str):
+        return jsonify({"error": "name and number must be strings"}), 400
     if not isinstance(email, str) or not isinstance(address, str):
         return jsonify({"error": "email and address must be strings"}), 400

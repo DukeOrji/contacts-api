@@ -8,7 +8,7 @@ sys_bp = Blueprint("sys", __name__) #create blueprint - easily register endpoint
 
 #Insert sample data into rows
 @sys_bp.route("/users", methods= ["POST"])  
-#@require_api_key  
+@require_api_key  
 def insert_data():
     data = request.get_json(force=True)
     if not data:
@@ -22,13 +22,15 @@ def insert_data():
     conn = get_conn() 
     cur = conn.cursor()
 
-    #make sure variable acceot the necessary data type (basic validation)
-    bv(name, number, email, address)
+    #make sure variable accept the necessary data type (basic validation)
+    validation = bv(name, number, email, address)
+    if validation:
+        return validation
     
     try:
         cur.execute("INSERT INTO users (name) VALUES(?)", (name,))
         user_id = cur.lastrowid
-        cur.execute("INSERT INTO contacts (number, email, user_id, address) VALUES(?, ?)", (number, email, user_id, address))
+        cur.execute("INSERT INTO contacts (number, email, user_id, address) VALUES(?, ?, ?, ?)", (number, email, user_id, address))
         conn.commit()
 
         return jsonify({
@@ -37,7 +39,7 @@ def insert_data():
             "Email": email,
             "Address": address,
             "User_id": user_id
-        }), 201 #resouce is created
+        }), 201 #resource is created
 
     except sqlite3.Error as e:
         conn.close()
@@ -45,6 +47,7 @@ def insert_data():
 
 #link user to contact
 @sys_bp.route("/users/<int:user_id>/contacts", methods=["GET"])
+@require_api_key 
 def list_user_table(user_id):
     conn = get_conn()
     cur = conn.cursor()
@@ -73,6 +76,7 @@ def list_user_table(user_id):
 
 #display the complete table
 @sys_bp.route("/users/contacts/list", methods = ["GET"])
+@require_api_key 
 def list_all_tables():
     conn = get_conn()
     cur = conn.cursor()
@@ -86,6 +90,8 @@ def list_all_tables():
 
     rows = cur.fetchall()
     if len(rows) == 0:
+        conn.close()
         return jsonify({"message": "empty table."}), 404
+    
     conn.close()
     return jsonify([dict(r) for r in rows]), 200
