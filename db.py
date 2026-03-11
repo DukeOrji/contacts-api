@@ -19,7 +19,7 @@ def clear_db():
     conn.commit()
     conn.close()
 
-
+#create tables to store data
 def init_db():
     conn = get_conn()
     cur = conn.cursor()
@@ -47,6 +47,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+#input validation function - avoids redundancy
 def basic_validation(name, number, email, address):
     if not all([name, number, email, address]):
         return jsonify({"error": "All fields are required"}), 400

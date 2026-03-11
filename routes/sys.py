@@ -10,7 +10,7 @@ sys_bp = Blueprint("sys", __name__) #create blueprint - easily register endpoint
 @sys_bp.route("/users", methods= ["POST"])  
 @require_api_key  
 def insert_data():
-    data = request.get_json(force=True)
+    data = request.get_json(force=True) #extract JSON from postman or file
     if not data:
         return jsonify({"error": "JSON body is required"}), 400
 
@@ -54,7 +54,7 @@ def list_user_table(user_id):
 
     cur.execute("SELECT id FROM users WHERE id=?", (user_id,))
     user = cur.fetchone()
-    if user is None:    #verify user before linking contact information
+    if user is None:    #verify user before refrencing contact information
         conn.close()
         return jsonify({"Error": "user id was not found"}), 404
 

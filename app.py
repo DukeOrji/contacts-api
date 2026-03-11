@@ -1,15 +1,8 @@
-"""
-This software was created to showcase my technical skills, such as: 
-error handling, authenticative authorization, sql usage, technical framework architechture
-------
-This software houses tables for a user and their contact info, such as:
-phone number, email, address
-"""
 
 from flask import Flask, Blueprint, request, jsonify
 from db import init_db
 
-app = Flask(__name__)
+app = Flask(__name__) #initialize application server
 
 from routes.sys import sys_bp
 from routes.modify import modify_bp
@@ -19,7 +12,7 @@ app.register_blueprint(modify_bp)
 
 @app.route("/")
 def home():
-    return "API is running", 200
+    return "API is running", 200 #health check for server
 
 
 

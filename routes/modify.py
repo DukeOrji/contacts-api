@@ -44,9 +44,9 @@ def delete_table():
 @modify_bp.route("/users/<int:user_id>/contacts", methods = ["PUT"])
 @require_api_key 
 def update_list(user_id):
-    data = request.get_json(force=True)
+    data = request.get_json(force=True) #extract JSON from postman or file
     if not data:
-        return jsonify({"error": "JSON body is required"}), 400
+        return jsonify({"error": "JSON body is required"}), 400 
 
     name = data.get("name")
     number = data.get("number")
